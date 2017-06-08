@@ -11,21 +11,15 @@ pom.xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-elasticsearch-client</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
 ## Usage
 
-`DefaultSpanManager` is used to get active span
-
 ```java
 // Instantiate tracer
 Tracer tracer = ...
-
-// Register tracer with GlobalTracer
-GlobalTracer.register(tracer);
-
 
 // Build TransportClient with TracingPreBuiltTransportClient
 TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
@@ -34,7 +28,7 @@ TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
 // Build RestClient adding TracingHttpClientConfigCallback
  RestClient restClient = RestClient.builder(
                 new HttpHost(...))
-                .setHttpClientConfigCallback(new TracingHttpClientConfigCallback())
+                .setHttpClientConfigCallback(new TracingHttpClientConfigCallback(tracer))
                 .build();
 
 
@@ -42,5 +36,5 @@ TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
 
 [ci-img]: https://travis-ci.org/opentracing-contrib/java-elasticsearch-client.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/java-elasticsearch-client
-[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-elasticsearch-client.svg?maxAge=2592000
+[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-elasticsearch-client.svg
 [maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-elasticsearch-client

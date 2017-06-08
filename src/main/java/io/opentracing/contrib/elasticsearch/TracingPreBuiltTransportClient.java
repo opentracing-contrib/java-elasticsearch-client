@@ -1,10 +1,10 @@
 package io.opentracing.contrib.elasticsearch;
 
+import io.opentracing.ActiveSpan;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.spanmanager.DefaultSpanManager;
 import io.opentracing.tag.Tags;
-import io.opentracing.util.GlobalTracer;
+import java.util.Collection;
 import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
@@ -14,39 +14,48 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
-import java.util.Collection;
-
 
 public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
 
-    @SafeVarargs
-    public TracingPreBuiltTransportClient(Settings settings, Class<? extends Plugin>... plugins) {
-        super(settings, plugins);
+  private final Tracer tracer;
+
+  @SafeVarargs
+  public TracingPreBuiltTransportClient(Tracer tracer, Settings settings,
+      Class<? extends Plugin>... plugins) {
+    super(settings, plugins);
+    this.tracer = tracer;
+  }
+
+  public TracingPreBuiltTransportClient(Tracer tracer, Settings settings,
+      Collection<Class<? extends Plugin>> plugins) {
+    super(settings, plugins);
+    this.tracer = tracer;
+  }
+
+  public TracingPreBuiltTransportClient(Tracer tracer, Settings settings,
+      Collection<Class<? extends Plugin>> plugins,
+      HostFailureListener hostFailureListener) {
+    super(settings, plugins, hostFailureListener);
+    this.tracer = tracer;
+  }
+
+  @Override
+  protected <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void doExecute(
+      Action<Request, Response, RequestBuilder> action, Request request,
+      ActionListener<Response> listener) {
+    Tracer.SpanBuilder spanBuilder = tracer.buildSpan(request.getClass().getSimpleName())
+        .ignoreActiveSpan()
+        .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
+
+    ActiveSpan parentSpan = tracer.activeSpan();
+    if (parentSpan != null) {
+      spanBuilder.asChildOf(parentSpan.context());
     }
 
-    public TracingPreBuiltTransportClient(Settings settings, Collection<Class<? extends Plugin>> plugins) {
-        super(settings, plugins);
-    }
+    Span span = spanBuilder.startManual();
+    SpanDecorator.onRequest(span);
 
-    public TracingPreBuiltTransportClient(Settings settings, Collection<Class<? extends Plugin>> plugins,
-                                          HostFailureListener hostFailureListener) {
-        super(settings, plugins, hostFailureListener);
-    }
-
-    @Override
-    protected <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> void doExecute(Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
-        Tracer.SpanBuilder spanBuilder = GlobalTracer.get().buildSpan(request.getClass().getSimpleName())
-                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
-
-        Span parentSpan = DefaultSpanManager.getInstance().current().getSpan();
-        if (parentSpan != null) {
-            spanBuilder.asChildOf(parentSpan.context());
-        }
-
-        Span span = spanBuilder.start();
-        SpanDecorator.onRequest(span);
-
-        ActionListener<Response> actionFuture = new TracingResponseListener<>(listener, span);
-        super.doExecute(action, request, actionFuture);
-    }
+    ActionListener<Response> actionFuture = new TracingResponseListener<>(listener, span);
+    super.doExecute(action, request, actionFuture);
+  }
 }
