@@ -25,7 +25,9 @@ class SpanDecorator {
   }
 
   static void onResponse(ActionResponse response, Span span) {
-    Tags.PEER_HOSTNAME.set(span, response.remoteAddress().getHost());
+    if (response.remoteAddress() != null) {
+      Tags.PEER_HOSTNAME.set(span, response.remoteAddress().getHost());
+    }
   }
 
   static void onResponse(HttpResponse response, Span span) {
