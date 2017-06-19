@@ -70,7 +70,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   }
 
   /**
-   * Extract context from headers or from Span Manager
+   * Extract context from headers or from Active Span
    *
    * @param request http request
    * @return extracted context

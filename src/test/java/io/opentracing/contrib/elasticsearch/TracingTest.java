@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
+import io.opentracing.util.ThreadLocalActiveSpanSource;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +47,8 @@ public class TracingTest {
   private static final String ES_WORKING_DIR = "target/es";
   private static String clusterName = "cluster-name";
   private static Node node;
-  private final MockTracer mockTracer = new MockTracer(MockTracer.Propagator.TEXT_MAP);
+  private final MockTracer mockTracer = new MockTracer(new ThreadLocalActiveSpanSource(),
+      MockTracer.Propagator.TEXT_MAP);
 
   @BeforeClass
   public static void startElasticsearch() throws Exception {
@@ -171,6 +173,7 @@ public class TracingTest {
       assertEquals(Tags.SPAN_KIND_CLIENT, mockSpan.tags().get(Tags.SPAN_KIND.getKey()));
       assertEquals(SpanDecorator.COMPONENT_NAME, mockSpan.tags().get(Tags.COMPONENT.getKey()));
       assertEquals(0, mockSpan.generatedErrors().size());
+      assertEquals(0, mockSpan.parentId());
       String operationName = mockSpan.operationName();
       assertTrue(operationName.equals(expectedOperationName));
     }

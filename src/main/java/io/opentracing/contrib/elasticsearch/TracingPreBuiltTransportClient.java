@@ -1,6 +1,5 @@
 package io.opentracing.contrib.elasticsearch;
 
-import io.opentracing.ActiveSpan;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.tag.Tags;
@@ -44,13 +43,7 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
       Action<Request, Response, RequestBuilder> action, Request request,
       ActionListener<Response> listener) {
     Tracer.SpanBuilder spanBuilder = tracer.buildSpan(request.getClass().getSimpleName())
-        .ignoreActiveSpan()
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
-
-    ActiveSpan parentSpan = tracer.activeSpan();
-    if (parentSpan != null) {
-      spanBuilder.asChildOf(parentSpan.context());
-    }
 
     Span span = spanBuilder.startManual();
     SpanDecorator.onRequest(span);
