@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,7 +60,7 @@ public class TracingTest {
   private static final String ES_WORKING_DIR = "target/es";
   private static String clusterName = "cluster-name";
   private static Node node;
-  private final MockTracer mockTracer = new MockTracer(new ThreadLocalActiveSpanSource(),
+  private final MockTracer mockTracer = new MockTracer(new ThreadLocalScopeManager(),
       MockTracer.Propagator.TEXT_MAP);
 
   @BeforeClass

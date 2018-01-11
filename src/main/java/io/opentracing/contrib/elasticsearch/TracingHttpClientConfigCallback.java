@@ -13,7 +13,6 @@
  */
 package io.opentracing.contrib.elasticsearch;
 
-import io.opentracing.ActiveSpan;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -56,7 +55,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
           spanBuilder.asChildOf(parentContext);
         }
 
-        Span span = spanBuilder.startManual();
+        Span span = spanBuilder.start();
         SpanDecorator.onRequest(request, span);
 
         tracer.inject(span.context(), Format.Builtin.HTTP_HEADERS,
@@ -83,7 +82,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   }
 
   /**
-   * Extract context from headers or from Active Span
+   * Extract context from headers or from active Span
    *
    * @param request http request
    * @return extracted context
@@ -96,7 +95,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
       return spanContext;
     }
 
-    ActiveSpan span = tracer.activeSpan();
+    Span span = tracer.activeSpan();
     if (span != null) {
       return span.context();
     }

@@ -58,7 +58,7 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
     Tracer.SpanBuilder spanBuilder = tracer.buildSpan(request.getClass().getSimpleName())
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
-    Span span = spanBuilder.startManual();
+    Span span = spanBuilder.start();
     SpanDecorator.onRequest(span);
 
     ActionListener<Response> actionFuture = new TracingResponseListener<>(listener, span);
