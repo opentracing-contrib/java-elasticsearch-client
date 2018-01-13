@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
   <artifactId>opentracing-elasticsearch-client</artifactId>
-  <version>0.0.4</version>
+  <version>0.0.5-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>OpenTracing Instrumentation for Elasticsearch Client</description>
@@ -32,7 +32,7 @@
     <developerConnection>
       scm:git:https://github.com/opentracing-contrib/java-elasticsearch-client.git
     </developerConnection>
-    <tag>0.0.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <licenses>
