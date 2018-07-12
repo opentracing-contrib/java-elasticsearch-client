@@ -11,29 +11,34 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
-
+package io.opentracing.contrib.elasticsearch.common;
 
 import io.opentracing.propagation.TextMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 
-public class HttpTextMapInjectAdapter implements TextMap {
 
-  private final HttpRequest httpRequest;
+public class HttpTextMapExtractAdapter implements TextMap {
 
-  public HttpTextMapInjectAdapter(HttpRequest request) {
-    this.httpRequest = request;
+  private final Map<String, String> map = new HashMap<>();
+
+  public HttpTextMapExtractAdapter(HttpRequest request) {
+    for (Header header : request.getAllHeaders()) {
+      map.put(header.getName(), header.getValue());
+    }
   }
 
   @Override
   public Iterator<Map.Entry<String, String>> iterator() {
-    throw new UnsupportedOperationException("iterator should never be used with Tracer.inject()");
+    return map.entrySet().iterator();
   }
 
   @Override
   public void put(String key, String value) {
-    httpRequest.addHeader(key, value);
+    throw new UnsupportedOperationException(
+        "HttpTextMapExtractAdapte should only be used with Tracer.extract()");
   }
 }

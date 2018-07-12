@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
+package io.opentracing.contrib.elasticsearch.common;
 
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
@@ -70,7 +70,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
       public void process(HttpResponse response, HttpContext context)
           throws HttpException, IOException {
         Object spanObject = context.getAttribute("span");
-        if (spanObject != null && spanObject instanceof Span) {
+        if (spanObject instanceof Span) {
           Span span = (Span) spanObject;
           SpanDecorator.onResponse(response, span);
           span.finish();
