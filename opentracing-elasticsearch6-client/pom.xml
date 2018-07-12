@@ -14,19 +14,17 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-elasticsearch-client-parent</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
   </parent>
 
   <artifactId>opentracing-elasticsearch6-client</artifactId>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>0.0.5</version>
   <name>OpenTracing Instrumentation for Elasticsearch 6 Client</name>
   <description>OpenTracing Instrumentation for Elasticsearch 6 Client</description>
 
@@ -34,7 +32,7 @@
     <dependency>
       <groupId>io.opentracing.contrib</groupId>
       <artifactId>opentracing-elasticsearch-client-common</artifactId>
-      <version>0.0.5-SNAPSHOT</version>
+      <version>0.0.5</version>
       <exclusions>
         <exclusion>
           <groupId>org.elasticsearch.client</groupId>
