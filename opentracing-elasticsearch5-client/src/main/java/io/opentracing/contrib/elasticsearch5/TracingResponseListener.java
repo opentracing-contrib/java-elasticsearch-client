@@ -11,9 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
+package io.opentracing.contrib.elasticsearch5;
 
 import io.opentracing.Span;
+import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
+import io.opentracing.tag.Tags;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionResponse;
 
@@ -29,7 +31,10 @@ public class TracingResponseListener<T extends ActionResponse> implements Action
 
   @Override
   public void onResponse(T t) {
-    SpanDecorator.onResponse(t, span);
+    if (t.remoteAddress() != null) {
+      Tags.PEER_HOSTNAME.set(span, t.remoteAddress().getHost());
+      Tags.PEER_PORT.set(span, t.remoteAddress().getPort());
+    }
 
     try {
       listener.onResponse(t);

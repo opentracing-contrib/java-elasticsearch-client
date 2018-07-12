@@ -7,11 +7,24 @@ OpenTracing instrumentation for Elasticsearch clients.
 
 ### Maven
 pom.xml
+
+#### Elasticsearch 5
+
 ```xml
 <dependency>
     <groupId>io.opentracing.contrib</groupId>
-    <artifactId>opentracing-elasticsearch-client</artifactId>
-    <version>0.0.4</version>
+    <artifactId>opentracing-elasticsearch5-client</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
+
+#### Elasticsearch 6
+
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-elasticsearch6-client</artifactId>
+    <version>VERSION</version>
 </dependency>
 ```
 

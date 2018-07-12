@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
+package io.opentracing.contrib.elasticsearch5;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.junit.Assert.assertEquals;
@@ -19,6 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
+import io.opentracing.contrib.elasticsearch.common.TracingHttpClientConfigCallback;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.tag.Tags;
@@ -42,7 +44,7 @@ import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.InternalSettingsPreparer;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.plugins.Plugin;
@@ -144,7 +146,7 @@ public class TracingTest {
         .put("cluster.name", clusterName).build();
 
     TransportClient client = new TracingPreBuiltTransportClient(mockTracer, settings)
-        .addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"),
+        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"),
             Integer.parseInt(HTTP_TRANSPORT_PORT)));
 
     IndexRequest indexRequest = new IndexRequest("twitter").type("tweet").id("1").

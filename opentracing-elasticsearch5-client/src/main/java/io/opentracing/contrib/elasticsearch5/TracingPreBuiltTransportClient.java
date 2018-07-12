@@ -11,10 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
+package io.opentracing.contrib.elasticsearch5;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
 import io.opentracing.tag.Tags;
 import java.util.Collection;
 import org.elasticsearch.action.Action;

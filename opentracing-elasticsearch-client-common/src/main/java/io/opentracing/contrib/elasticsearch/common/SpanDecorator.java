@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.opentracing.contrib.elasticsearch;
+package io.opentracing.contrib.elasticsearch.common;
 
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -21,34 +21,26 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.elasticsearch.action.ActionResponse;
 
-class SpanDecorator {
+public class SpanDecorator {
 
-  static final String COMPONENT_NAME = "java-elasticsearch";
+  public static final String COMPONENT_NAME = "java-elasticsearch";
 
-  static void onRequest(Span span) {
+  public static void onRequest(Span span) {
     Tags.COMPONENT.set(span, COMPONENT_NAME);
   }
 
-  static void onRequest(HttpRequest request, Span span) {
+  public static void onRequest(HttpRequest request, Span span) {
     Tags.COMPONENT.set(span, COMPONENT_NAME);
     Tags.HTTP_METHOD.set(span, request.getRequestLine().getMethod());
     Tags.HTTP_URL.set(span, request.getRequestLine().getUri());
   }
 
-  static void onResponse(ActionResponse response, Span span) {
-    if (response.remoteAddress() != null) {
-      Tags.PEER_HOSTNAME.set(span, response.remoteAddress().address().getHostName());
-      Tags.PEER_PORT.set(span, response.remoteAddress().getPort());
-    }
-  }
-
-  static void onResponse(HttpResponse response, Span span) {
+  public static void onResponse(HttpResponse response, Span span) {
     Tags.HTTP_STATUS.set(span, response.getStatusLine().getStatusCode());
   }
 
-  static void onError(Throwable throwable, Span span) {
+  public static void onError(Throwable throwable, Span span) {
     Tags.ERROR.set(span, Boolean.TRUE);
     span.log(errorLogs(throwable));
   }

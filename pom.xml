@@ -14,13 +14,16 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
-  <artifactId>opentracing-elasticsearch-client</artifactId>
+  <artifactId>opentracing-elasticsearch-client-parent</artifactId>
   <version>0.0.5-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-  <name>${project.groupId}:${project.artifactId}</name>
+  <name>OpenTracing Instrumentation for Elasticsearch Client</name>
   <description>OpenTracing Instrumentation for Elasticsearch Client</description>
   <url>https://github.com/opentracing-contrib/java-elasticsearch-client</url>
   <inceptionYear>2017-2018</inceptionYear>
@@ -64,19 +67,21 @@
     <opentracing.version>0.31.0</opentracing.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.1</jacoco-maven-plugin.version>
+    <elasticsearch5.version>5.6.10</elasticsearch5.version>
+    <elasticsearch6.version>6.3.1</elasticsearch6.version>
   </properties>
+
+  <modules>
+    <module>opentracing-elasticsearch5-client</module>
+    <module>opentracing-elasticsearch6-client</module>
+    <module>opentracing-elasticsearch-client-common</module>
+  </modules>
 
   <dependencies>
     <dependency>
       <groupId>io.opentracing</groupId>
       <artifactId>opentracing-api</artifactId>
       <version>${opentracing.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.elasticsearch.client</groupId>
-      <artifactId>transport</artifactId>
-      <version>6.2.4</version>
     </dependency>
 
     <dependency>
