@@ -47,6 +47,10 @@ TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
 
 ```
 
+## License
+
+[Apache 2.0 License](./LICENSE).
+
 [ci-img]: https://travis-ci.org/opentracing-contrib/java-elasticsearch-client.svg?branch=master
 [ci]: https://travis-ci.org/opentracing-contrib/java-elasticsearch-client
 [cov-img]: https://coveralls.io/repos/github/opentracing-contrib/java-elasticsearch-client/badge.svg?branch=master
