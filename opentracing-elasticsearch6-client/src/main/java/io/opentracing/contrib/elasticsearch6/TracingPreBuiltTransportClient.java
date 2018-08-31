@@ -17,6 +17,7 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
 import io.opentracing.tag.Tags;
+import io.opentracing.util.GlobalTracer;
 import java.util.Collection;
 import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
@@ -39,10 +40,27 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
     this.tracer = tracer;
   }
 
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  @SafeVarargs
+  public TracingPreBuiltTransportClient(Settings settings,
+      Class<? extends Plugin>... plugins) {
+    this(GlobalTracer.get(), settings, plugins);
+  }
+
   public TracingPreBuiltTransportClient(Tracer tracer, Settings settings,
       Collection<Class<? extends Plugin>> plugins) {
     super(settings, plugins);
     this.tracer = tracer;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingPreBuiltTransportClient(Settings settings,
+      Collection<Class<? extends Plugin>> plugins) {
+    this(GlobalTracer.get(), settings, plugins);
   }
 
   public TracingPreBuiltTransportClient(Tracer tracer, Settings settings,
@@ -50,6 +68,15 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
       HostFailureListener hostFailureListener) {
     super(settings, plugins, hostFailureListener);
     this.tracer = tracer;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingPreBuiltTransportClient(Settings settings,
+      Collection<Class<? extends Plugin>> plugins,
+      HostFailureListener hostFailureListener) {
+    this(GlobalTracer.get(), settings, plugins, hostFailureListener);
   }
 
   @Override

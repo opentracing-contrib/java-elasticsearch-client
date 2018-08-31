@@ -34,6 +34,9 @@ pom.xml
 // Instantiate tracer
 Tracer tracer = ...
 
+// Optionally register tracer with GlobalTracer
+GlobalTracer.register(tracer);
+
 // Build TransportClient with TracingPreBuiltTransportClient
 TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
                 .addTransportAddress(...));
