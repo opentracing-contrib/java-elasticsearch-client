@@ -18,6 +18,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
 import io.opentracing.tag.Tags;
+import io.opentracing.util.GlobalTracer;
 import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -35,6 +36,13 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
 
   public TracingHttpClientConfigCallback(Tracer tracer) {
     this.tracer = tracer;
+  }
+
+  /**
+   * GlobalTracer is used to get tracer
+   */
+  public TracingHttpClientConfigCallback() {
+    this(GlobalTracer.get());
   }
 
   @Override
