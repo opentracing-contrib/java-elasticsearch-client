@@ -25,47 +25,47 @@ import java.util.function.Function;
  */
 public class ClientSpanNameProvider {
 
-    private String regexParameterPattern = "\\?*+$";
-    private String regexTaskIDPattern = "task_id:(\\d+)";
+  private String regexParameterPattern = "\\?*+$";
+  private String regexTaskIDPattern = "task_id:(\\d+)";
 
-    public static Function<HttpRequest, String> REQUEST_METHOD_NAME =
-            (request) -> replaceIfNull(request.getRequestLine().getMethod(), "unknown");
+  public static Function<HttpRequest, String> REQUEST_METHOD_NAME =
+      (request) -> replaceIfNull(request.getRequestLine().getMethod(), "unknown");
 
-    public static Function<HttpRequest, String> PREFIXED_REQUEST_METHOD_NAME(final String prefix) {
-        return (request) -> replaceIfNull(prefix, "")
-                + replaceIfNull(request.getRequestLine().getMethod(), "unknown");
-    }
+  public static Function<HttpRequest, String> PREFIXED_REQUEST_METHOD_NAME(final String prefix) {
+    return (request) -> replaceIfNull(prefix, "")
+        + replaceIfNull(request.getRequestLine().getMethod(), "unknown");
+  }
 
-    /**
-     * The following methods are derived from the Elasticsearch http API found here:
-     * https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docs.html
-     */
-    public static Function<HttpRequest, String> REQUEST_TARGET_NAME =
-            (request) -> replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
+  /**
+   * The following methods are derived from the Elasticsearch http API found here:
+   * https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docs.html
+   */
+  public static Function<HttpRequest, String> REQUEST_TARGET_NAME =
+      (request) -> replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
 
-    public static Function<HttpRequest, String> PREFIXED_REQUEST_TARGET_NAME(final String prefix) {
-        return (request) -> replaceIfNull(prefix, "")
-                + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
-    }
+  public static Function<HttpRequest, String> PREFIXED_REQUEST_TARGET_NAME(final String prefix) {
+    return (request) -> replaceIfNull(prefix, "")
+        + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
+  }
 
 
-    public static Function<HttpRequest, String> REQUEST_METHOD_TARGET_NAME =
-            (request) -> replaceIfNull(request.getRequestLine().getMethod(), "unknown")
-                    + " " + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
+  public static Function<HttpRequest, String> REQUEST_METHOD_TARGET_NAME =
+      (request) -> replaceIfNull(request.getRequestLine().getMethod(), "unknown")
+          + " " + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
 
-    public static Function<HttpRequest, String> PREFIXED_REQUEST_METHOD_TARGET_NAME(final String prefix) {
-        return (request) -> replaceIfNull(prefix, "")
-                + replaceIfNull(request.getRequestLine().getMethod(), "unknown")
-                + " " + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
-    }
+  public static Function<HttpRequest, String> PREFIXED_REQUEST_METHOD_TARGET_NAME(final String prefix) {
+    return (request) -> replaceIfNull(prefix, "")
+        + replaceIfNull(request.getRequestLine().getMethod(), "unknown")
+        + " " + replaceIfNull(standardizeUri(request.getRequestLine().getUri()), "unknown");
+  }
 
-    private static String replaceIfNull(String input, String replacement) {
-        return (input == null) ? replacement : input;
-    }
+  private static String replaceIfNull(String input, String replacement) {
+    return (input == null) ? replacement : input;
+  }
 
-    private static String standardizeUri(String uri) {
-        return (uri == null) ? null : uri.replaceAll("\\?.*$", "") // Removes parameters
-                .replaceAll("task_id:\\d+", "task_id:\\?") // Replaces unique IDs with "?"
-                .replaceAll("/\\d+", "/\\?"); // Replaces unique IDs with "?"
-    }
+  private static String standardizeUri(String uri) {
+    return (uri == null) ? null : uri.replaceAll("\\?.*$", "") // Removes parameters
+        .replaceAll("task_id:\\d+", "task_id:\\?") // Replaces unique IDs with "?"
+        .replaceAll("/\\d+", "/\\?"); // Replaces unique IDs with "?"
+  }
 }
