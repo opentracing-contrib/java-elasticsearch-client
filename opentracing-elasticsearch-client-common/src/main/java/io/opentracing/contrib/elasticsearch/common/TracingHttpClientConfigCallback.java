@@ -20,6 +20,8 @@ import io.opentracing.propagation.Format;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import java.io.IOException;
+import java.util.function.Function;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -33,16 +35,26 @@ import org.elasticsearch.client.RestClientBuilder;
 public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpClientConfigCallback {
 
   private final Tracer tracer;
+  private final Function<HttpRequest, String> spanNameProvider;
 
-  public TracingHttpClientConfigCallback(Tracer tracer) {
+  public TracingHttpClientConfigCallback(Tracer tracer, Function<HttpRequest, String> spanNameProvider) {
     this.tracer = tracer;
+    this.spanNameProvider = spanNameProvider;
+  }
+
+  /**
+   * Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME) is used
+   */
+  public TracingHttpClientConfigCallback(Tracer tracer) {
+    this(tracer, ClientSpanNameProvider.REQUEST_METHOD_NAME);
   }
 
   /**
    * GlobalTracer is used to get tracer
+   * Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME) is used
    */
   public TracingHttpClientConfigCallback() {
-    this(GlobalTracer.get());
+    this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME);
   }
 
   @Override
@@ -53,7 +65,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
       @Override
       public void process(HttpRequest request, HttpContext context)
           throws HttpException, IOException {
-        Tracer.SpanBuilder spanBuilder = tracer.buildSpan(request.getRequestLine().getMethod())
+        Tracer.SpanBuilder spanBuilder = tracer.buildSpan(spanNameProvider.apply(request))
             .ignoreActiveSpan()
             .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
