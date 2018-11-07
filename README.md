@@ -80,13 +80,13 @@ default should no other span name provider be provided.
 * `REQUEST_TARGET_NAME`: Returns the Elasticsearch target of the request, i.e. the index and resource it's operating on.
 IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
   * GET /twitter/tweet/1?routing=user1 -> "/twitter/tweet/?"
-* `PREFIXED_REQUEST_TARGET_NAME`: Returns a String concatenation of prefix and the Elasticsearch target of the request.
+* `PREFIXED_REQUEST_TARGET_NAME(String prefix)`: Returns a String concatenation of prefix and the Elasticsearch target of the request.
 IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
   * GET /twitter/tweet/1?routing=user1 -> prefix + "/twitter/tweet/?"
 * `REQUEST_METHOD_TARGET_NAME`: Returns a String concatenation of the HTTP method of the request and the Elasticsearch target of the request.
 IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
   * GET /twitter/tweet/1?routing=user1 -> "GET /twitter/tweet/?"
-* `PREFIXED_REQUEST_METHOD_TARGET_NAME`: Returns a String concatenation of prefix, the HTTP method of the request, and
+* `PREFIXED_REQUEST_METHOD_TARGET_NAME(String prefix)`: Returns a String concatenation of prefix, the HTTP method of the request, and
 the Elasticsearch target of the request. IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
   * GET /twitter/tweet/1?routing=user1 -> prefix + "GET /twitter/tweet/?"
   
