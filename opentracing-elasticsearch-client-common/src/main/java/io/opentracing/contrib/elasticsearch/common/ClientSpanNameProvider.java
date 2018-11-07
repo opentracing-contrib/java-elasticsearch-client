@@ -30,9 +30,12 @@ public class ClientSpanNameProvider {
    * The following patterns are derived from the Elasticsearch http API found here:
    * https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docs.html
    */
+  // Matches the parameters of the request
   private static final Pattern regexParameterPattern = Pattern.compile("\\?.+$");
+  // Matches task IDs
   private static final Pattern regexTaskIDPattern = Pattern.compile("task_id:\\d+");
-  private static final Pattern regexIDPattern = Pattern.compile("/\\d+");
+  // Matches other IDs
+  private static final Pattern regexIDPattern = Pattern.compile("/\\d+((/)|($))");
 
   /**
    * A Function that returns the HTTP Method of the request as the name.
@@ -116,6 +119,6 @@ public class ClientSpanNameProvider {
                             uri
                     ).replaceFirst("")
             ).replaceAll("task_id:\\?")
-    ).replaceAll("/\\?");
+    ).replaceAll("/\\?$1");
   }
 }
