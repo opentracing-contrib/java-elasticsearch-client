@@ -46,7 +46,6 @@ public class ClientSpanNameProviderTest {
       .setUri("/_tasks/task_id:1/_cancel")
       .build();
 
-
   @Test
   public void requestMethodSpanNameFormatsCorrectly() {
     Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.REQUEST_METHOD_NAME;
