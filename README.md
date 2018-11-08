@@ -50,6 +50,46 @@ TransportClient transportClient = new TracingPreBuiltTransportClient(settings)
 
 ```
 
+## Custom Span Names with the TracingHttpClientConfigCallback
+This driver includes support for customizing the spans created using the TracingHttpClientConfigCallback.
+You can use the predefined ones listed further below, or write your own in the form of a `Function` object.
+```java
+// Create a Function for the TracingHttpClientConfigCallback that operates on
+// the HttpRequest and returns a String that will be used as the Span name.
+Function<HttpRequest, String> customSpanNameProvider =
+  (request) -> request.getRequestLine().getMethod().toLowerCase();
+
+// Build RestClient adding TracingHttpClientConfigCallback
+ RestClient restClient = RestClient.builder(
+                new HttpHost(...))
+                .setHttpClientConfigCallback(new TracingHttpClientConfigCallback(tracer, customSpanNameProvider))
+                .build();
+ 
+ // Spans created by the restClient will now have the request's lowercase method name as the span name.
+ // "POST" -> "post"
+```
+
+### Predefined Span Name Providers 
+The following Functions are already included in the ClientSpanNameProvider class, with `REQUEST_METHOD_NAME` being the
+default should no other span name provider be provided.
+
+* `REQUEST_METHOD_NAME`: Returns the HTTP method of the request.
+  * GET /twitter/tweet/1?routing=user1 -> "GET"
+* `PREFIXED_REQUEST_METHOD_NAME(String prefix)`: Returns a String concatenation of prefix and the HTTP method of the request.
+  * GET /twitter/tweet/1?routing=user1 -> prefix + "GET"
+* `REQUEST_TARGET_NAME`: Returns the Elasticsearch target of the request, i.e. the index and resource it's operating on.
+IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
+  * GET /twitter/tweet/1?routing=user1 -> "/twitter/tweet/?"
+* `PREFIXED_REQUEST_TARGET_NAME(String prefix)`: Returns a String concatenation of prefix and the Elasticsearch target of the request.
+IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
+  * GET /twitter/tweet/1?routing=user1 -> prefix + "/twitter/tweet/?"
+* `REQUEST_METHOD_TARGET_NAME`: Returns a String concatenation of the HTTP method of the request and the Elasticsearch target of the request.
+IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
+  * GET /twitter/tweet/1?routing=user1 -> "GET /twitter/tweet/?"
+* `PREFIXED_REQUEST_METHOD_TARGET_NAME(String prefix)`: Returns a String concatenation of prefix, the HTTP method of the request, and
+the Elasticsearch target of the request. IDs and other numbers not part of names will be replaced with a "?" to avoid overly granular names.
+  * GET /twitter/tweet/1?routing=user1 -> prefix + "GET /twitter/tweet/?"
+  
 ## License
 
 [Apache 2.0 License](./LICENSE).
