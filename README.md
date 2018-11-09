@@ -98,5 +98,5 @@ the Elasticsearch target of the request. IDs and other numbers not part of names
 [ci]: https://travis-ci.org/opentracing-contrib/java-elasticsearch-client
 [cov-img]: https://coveralls.io/repos/github/opentracing-contrib/java-elasticsearch-client/badge.svg?branch=master
 [cov]: https://coveralls.io/github/opentracing-contrib/java-elasticsearch-client?branch=master
-[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-elasticsearch-client.svg
-[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-elasticsearch-client
+[maven-img]: https://img.shields.io/maven-central/v/io.opentracing.contrib/opentracing-elasticsearch6-client.svg
+[maven]: http://search.maven.org/#search%7Cga%7C1%7Copentracing-elasticsearch6-client
