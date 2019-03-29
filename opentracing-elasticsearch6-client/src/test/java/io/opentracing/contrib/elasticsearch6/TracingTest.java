@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,6 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
 import io.opentracing.contrib.elasticsearch.common.TracingHttpClientConfigCallback;
@@ -39,6 +38,7 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
@@ -107,28 +107,29 @@ public class TracingTest {
             "    \"message\" : \"trying out Elasticsearch\"\n" +
             "}", ContentType.APPLICATION_JSON);
 
-    Response indexResponse = restClient.performRequest(
-        "PUT",
-        "/twitter/tweet/1",
-        Collections.<String, String>emptyMap(),
-        entity);
+    Request request = new Request("PUT", "/twitter/tweet/1");
+    request.setEntity(entity);
+
+    Response indexResponse = restClient.performRequest(request);
 
     assertNotNull(indexResponse);
 
+    Request request2 = new Request("PUT", "/twitter/tweet/2");
+    request2.setEntity(entity);
+
     final CountDownLatch latch = new CountDownLatch(1);
     restClient
-        .performRequestAsync("PUT", "/twitter/tweet/2", Collections.<String, String>emptyMap(),
-            entity, new ResponseListener() {
-              @Override
-              public void onSuccess(Response response) {
-                latch.countDown();
-              }
+        .performRequestAsync(request2, new ResponseListener() {
+          @Override
+          public void onSuccess(Response response) {
+            latch.countDown();
+          }
 
-              @Override
-              public void onFailure(Exception exception) {
-                latch.countDown();
-              }
-            });
+          @Override
+          public void onFailure(Exception exception) {
+            latch.countDown();
+          }
+        });
 
     latch.await(30, TimeUnit.SECONDS);
     restClient.close();
@@ -190,7 +191,7 @@ public class TracingTest {
       assertEquals(0, mockSpan.generatedErrors().size());
       assertEquals(0, mockSpan.parentId());
       String operationName = mockSpan.operationName();
-      assertTrue(operationName.equals(expectedOperationName));
+      assertEquals(operationName, expectedOperationName);
     }
   }
 
@@ -198,7 +199,12 @@ public class TracingTest {
 
     public PluginConfigurableNode(Settings settings,
         Collection<Class<? extends Plugin>> classpathPlugins) {
-      super(InternalSettingsPreparer.prepareEnvironment(settings, null), classpathPlugins);
+      super(InternalSettingsPreparer.prepareEnvironment(settings, null), classpathPlugins, false);
+    }
+
+    @Override
+    protected void registerDerivedNodeNameWithLogger(String s) {
+
     }
   }
 }

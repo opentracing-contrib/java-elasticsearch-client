@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -16,19 +16,16 @@ package io.opentracing.contrib.elasticsearch.common;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
+import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.propagation.Format;
+import io.opentracing.propagation.Format.Builtin;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
-import java.io.IOException;
 import java.util.function.Function;
-
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.protocol.HttpContext;
 import org.elasticsearch.client.RestClientBuilder;
 
 
@@ -37,7 +34,8 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   private final Tracer tracer;
   private final Function<HttpRequest, String> spanNameProvider;
 
-  public TracingHttpClientConfigCallback(Tracer tracer, Function<HttpRequest, String> spanNameProvider) {
+  public TracingHttpClientConfigCallback(Tracer tracer,
+      Function<HttpRequest, String> spanNameProvider) {
     this.tracer = tracer;
     this.spanNameProvider = spanNameProvider;
   }
@@ -50,8 +48,8 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   }
 
   /**
-   * GlobalTracer is used to get tracer
-   * Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME) is used
+   * GlobalTracer is used to get tracer Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME)
+   * is used
    */
   public TracingHttpClientConfigCallback() {
     this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME);
@@ -61,40 +59,32 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   public HttpAsyncClientBuilder customizeHttpClient(
       final HttpAsyncClientBuilder httpClientBuilder) {
 
-    httpClientBuilder.addInterceptorFirst(new HttpRequestInterceptor() {
-      @Override
-      public void process(HttpRequest request, HttpContext context)
-          throws HttpException, IOException {
-        Tracer.SpanBuilder spanBuilder = tracer.buildSpan(spanNameProvider.apply(request))
-            .ignoreActiveSpan()
-            .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
+    httpClientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+      SpanBuilder spanBuilder = tracer.buildSpan(spanNameProvider.apply(request))
+          .ignoreActiveSpan()
+          .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
-        SpanContext parentContext = extract(request);
+      SpanContext parentContext = extract(request);
 
-        if (parentContext != null) {
-          spanBuilder.asChildOf(parentContext);
-        }
-
-        Span span = spanBuilder.start();
-        SpanDecorator.onRequest(request, span);
-
-        tracer.inject(span.context(), Format.Builtin.HTTP_HEADERS,
-            new HttpTextMapInjectAdapter(request));
-
-        context.setAttribute("span", span);
+      if (parentContext != null) {
+        spanBuilder.asChildOf(parentContext);
       }
+
+      Span span = spanBuilder.start();
+      SpanDecorator.onRequest(request, span);
+
+      tracer.inject(span.context(), Builtin.HTTP_HEADERS,
+          new HttpTextMapInjectAdapter(request));
+
+      context.setAttribute("span", span);
     });
 
-    httpClientBuilder.addInterceptorFirst(new HttpResponseInterceptor() {
-      @Override
-      public void process(HttpResponse response, HttpContext context)
-          throws HttpException, IOException {
-        Object spanObject = context.getAttribute("span");
-        if (spanObject instanceof Span) {
-          Span span = (Span) spanObject;
-          SpanDecorator.onResponse(response, span);
-          span.finish();
-        }
+    httpClientBuilder.addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
+      Object spanObject = context.getAttribute("span");
+      if (spanObject instanceof Span) {
+        Span span = (Span) spanObject;
+        SpanDecorator.onResponse(response, span);
+        span.finish();
       }
     });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,6 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
 import io.opentracing.contrib.elasticsearch.common.TracingHttpClientConfigCallback;
@@ -110,14 +109,14 @@ public class TracingTest {
     Response indexResponse = restClient.performRequest(
         "PUT",
         "/twitter/tweet/1",
-        Collections.<String, String>emptyMap(),
+        Collections.emptyMap(),
         entity);
 
     assertNotNull(indexResponse);
 
     final CountDownLatch latch = new CountDownLatch(1);
     restClient
-        .performRequestAsync("PUT", "/twitter/tweet/2", Collections.<String, String>emptyMap(),
+        .performRequestAsync("PUT", "/twitter/tweet/2", Collections.emptyMap(),
             entity, new ResponseListener() {
               @Override
               public void onSuccess(Response response) {
@@ -190,7 +189,7 @@ public class TracingTest {
       assertEquals(0, mockSpan.generatedErrors().size());
       assertEquals(0, mockSpan.parentId());
       String operationName = mockSpan.operationName();
-      assertTrue(operationName.equals(expectedOperationName));
+      assertEquals(operationName, expectedOperationName);
     }
   }
 

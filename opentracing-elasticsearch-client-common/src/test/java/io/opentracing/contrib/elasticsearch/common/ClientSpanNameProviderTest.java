@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 The OpenTracing Authors
+ * Copyright 2017-2019 The OpenTracing Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,13 +13,12 @@
  */
 package io.opentracing.contrib.elasticsearch.common;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.function.Function;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.junit.Test;
-
-import java.util.function.Function;
-
-import static org.junit.Assert.assertEquals;
 
 public class ClientSpanNameProviderTest {
 
@@ -60,7 +59,8 @@ public class ClientSpanNameProviderTest {
 
   @Test
   public void prefixedRequestMethodSpanNameFormatsCorrectly() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_METHOD_NAME("ELASTICSEARCH - ");
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_METHOD_NAME("ELASTICSEARCH - ");
 
     assertEquals("ELASTICSEARCH - GET", spanNameProvider.apply(getRequest));
     assertEquals("ELASTICSEARCH - GET", spanNameProvider.apply(getRequestWithID));
@@ -72,7 +72,8 @@ public class ClientSpanNameProviderTest {
 
   @Test
   public void prefixedRequestMethodSpanNameHandlesNull() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_METHOD_NAME(null);
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_METHOD_NAME(null);
 
     assertEquals("GET", spanNameProvider.apply(getRequest));
     assertEquals("GET", spanNameProvider.apply(getRequestWithID));
@@ -96,19 +97,24 @@ public class ClientSpanNameProviderTest {
 
   @Test
   public void prefixedRequestTargetSpanNameFormatsCorrectly() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_TARGET_NAME("ELASTICSEARCH - ");
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_TARGET_NAME("ELASTICSEARCH - ");
 
     assertEquals("ELASTICSEARCH - /twitter/tweet/", spanNameProvider.apply(getRequest));
     assertEquals("ELASTICSEARCH - /twitter/tweet/?", spanNameProvider.apply(getRequestWithID));
-    assertEquals("ELASTICSEARCH - /twitter/tweet/?", spanNameProvider.apply(getIndexRequestWithIDAndParameters));
-    assertEquals("ELASTICSEARCH - /twitter/tweet/?/_source", spanNameProvider.apply(getRequestWithIDWithSource));
+    assertEquals("ELASTICSEARCH - /twitter/tweet/?",
+        spanNameProvider.apply(getIndexRequestWithIDAndParameters));
+    assertEquals("ELASTICSEARCH - /twitter/tweet/?/_source",
+        spanNameProvider.apply(getRequestWithIDWithSource));
 
-    assertEquals("ELASTICSEARCH - /_tasks/task_id:?/_cancel", spanNameProvider.apply(postRequestCancelTaskID));
+    assertEquals("ELASTICSEARCH - /_tasks/task_id:?/_cancel",
+        spanNameProvider.apply(postRequestCancelTaskID));
   }
 
   @Test
   public void prefixedRequestTargetSpanNameHandlesNull() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_TARGET_NAME(null);
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_TARGET_NAME(null);
 
     assertEquals("/twitter/tweet/", spanNameProvider.apply(getRequest));
     assertEquals("/twitter/tweet/?", spanNameProvider.apply(getRequestWithID));
@@ -124,32 +130,41 @@ public class ClientSpanNameProviderTest {
 
     assertEquals("GET /twitter/tweet/", spanNameProvider.apply(getRequest));
     assertEquals("GET /twitter/tweet/?", spanNameProvider.apply(getRequestWithID));
-    assertEquals("GET /twitter/tweet/?", spanNameProvider.apply(getIndexRequestWithIDAndParameters));
-    assertEquals("GET /twitter/tweet/?/_source", spanNameProvider.apply(getRequestWithIDWithSource));
+    assertEquals("GET /twitter/tweet/?",
+        spanNameProvider.apply(getIndexRequestWithIDAndParameters));
+    assertEquals("GET /twitter/tweet/?/_source",
+        spanNameProvider.apply(getRequestWithIDWithSource));
 
     assertEquals("POST /_tasks/task_id:?/_cancel", spanNameProvider.apply(postRequestCancelTaskID));
   }
 
   @Test
   public void prefixedRequestMethodTargetSpanNameFormatsCorrectly() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_METHOD_TARGET_NAME("ELASTICSEARCH - ");
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_METHOD_TARGET_NAME("ELASTICSEARCH - ");
 
     assertEquals("ELASTICSEARCH - GET /twitter/tweet/", spanNameProvider.apply(getRequest));
     assertEquals("ELASTICSEARCH - GET /twitter/tweet/?", spanNameProvider.apply(getRequestWithID));
-    assertEquals("ELASTICSEARCH - GET /twitter/tweet/?", spanNameProvider.apply(getIndexRequestWithIDAndParameters));
-    assertEquals("ELASTICSEARCH - GET /twitter/tweet/?/_source", spanNameProvider.apply(getRequestWithIDWithSource));
+    assertEquals("ELASTICSEARCH - GET /twitter/tweet/?",
+        spanNameProvider.apply(getIndexRequestWithIDAndParameters));
+    assertEquals("ELASTICSEARCH - GET /twitter/tweet/?/_source",
+        spanNameProvider.apply(getRequestWithIDWithSource));
 
-    assertEquals("ELASTICSEARCH - POST /_tasks/task_id:?/_cancel", spanNameProvider.apply(postRequestCancelTaskID));
+    assertEquals("ELASTICSEARCH - POST /_tasks/task_id:?/_cancel",
+        spanNameProvider.apply(postRequestCancelTaskID));
   }
 
   @Test
   public void prefixedRequestMethodTargetSpanNameHandlesNull() {
-    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider.PREFIXED_REQUEST_METHOD_TARGET_NAME(null);
+    Function<HttpRequest, String> spanNameProvider = ClientSpanNameProvider
+        .PREFIXED_REQUEST_METHOD_TARGET_NAME(null);
 
     assertEquals("GET /twitter/tweet/", spanNameProvider.apply(getRequest));
     assertEquals("GET /twitter/tweet/?", spanNameProvider.apply(getRequestWithID));
-    assertEquals("GET /twitter/tweet/?", spanNameProvider.apply(getIndexRequestWithIDAndParameters));
-    assertEquals("GET /twitter/tweet/?/_source", spanNameProvider.apply(getRequestWithIDWithSource));
+    assertEquals("GET /twitter/tweet/?",
+        spanNameProvider.apply(getIndexRequestWithIDAndParameters));
+    assertEquals("GET /twitter/tweet/?/_source",
+        spanNameProvider.apply(getRequestWithIDWithSource));
 
     assertEquals("POST /_tasks/task_id:?/_cancel", spanNameProvider.apply(postRequestCancelTaskID));
   }
