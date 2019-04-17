@@ -18,7 +18,7 @@
   <parent>
     <artifactId>opentracing-elasticsearch-client-parent</artifactId>
     <groupId>io.opentracing.contrib</groupId>
-    <version>0.1.1</version>
+    <version>0.1.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>io.opentracing.contrib</groupId>
       <artifactId>opentracing-elasticsearch-client-common</artifactId>
-      <version>0.1.1</version>
+      <version>0.1.2-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.elasticsearch.client</groupId>

@@ -20,11 +20,11 @@
   <parent>
     <groupId>io.opentracing.contrib</groupId>
     <artifactId>opentracing-elasticsearch-client-parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>opentracing-elasticsearch6-client</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2-SNAPSHOT</version>
   <name>OpenTracing Instrumentation for Elasticsearch 6 Client</name>
   <description>OpenTracing Instrumentation for Elasticsearch 6 Client</description>
 
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>io.opentracing.contrib</groupId>
       <artifactId>opentracing-elasticsearch-client-common</artifactId>
-      <version>0.1.1</version>
+      <version>0.1.2-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.elasticsearch.client</groupId>
