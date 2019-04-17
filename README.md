@@ -28,6 +28,16 @@ pom.xml
 </dependency>
 ```
 
+#### Elasticsearch 7
+
+```xml
+<dependency>
+    <groupId>io.opentracing.contrib</groupId>
+    <artifactId>opentracing-elasticsearch7-client</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
+
 ## Usage
 
 ```java

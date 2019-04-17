@@ -14,7 +14,9 @@
     the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.opentracing.contrib</groupId>
   <artifactId>opentracing-elasticsearch-client-parent</artifactId>
@@ -67,12 +69,14 @@
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
     <elasticsearch5.version>5.6.16</elasticsearch5.version>
     <elasticsearch6.version>6.6.2</elasticsearch6.version>
+    <elasticsearch7.version>7.0.0</elasticsearch7.version>
   </properties>
 
   <modules>
     <module>opentracing-elasticsearch5-client</module>
     <module>opentracing-elasticsearch6-client</module>
     <module>opentracing-elasticsearch-client-common</module>
+    <module>opentracing-elasticsearch7-client</module>
   </modules>
 
   <dependencies>
