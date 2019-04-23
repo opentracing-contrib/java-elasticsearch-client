@@ -27,37 +27,68 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
 
 public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpClientConfigCallback {
 
   private final Tracer tracer;
   private final Function<HttpRequest, String> spanNameProvider;
+  private final HttpClientConfigCallback callback;
+
+  public TracingHttpClientConfigCallback(Tracer tracer,
+      Function<HttpRequest, String> spanNameProvider,
+      HttpClientConfigCallback callback) {
+    this.tracer = tracer;
+    this.spanNameProvider = spanNameProvider;
+    this.callback = callback;
+  }
 
   public TracingHttpClientConfigCallback(Tracer tracer,
       Function<HttpRequest, String> spanNameProvider) {
-    this.tracer = tracer;
-    this.spanNameProvider = spanNameProvider;
+    this(tracer, spanNameProvider, null);
   }
 
   /**
    * Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME) is used
    */
   public TracingHttpClientConfigCallback(Tracer tracer) {
-    this(tracer, ClientSpanNameProvider.REQUEST_METHOD_NAME);
+    this(tracer, ClientSpanNameProvider.REQUEST_METHOD_NAME, null);
   }
 
   /**
-   * GlobalTracer is used to get tracer Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME)
+   * Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME) is used
+   */
+  public TracingHttpClientConfigCallback(Tracer tracer, HttpClientConfigCallback callback) {
+    this(tracer, ClientSpanNameProvider.REQUEST_METHOD_NAME, callback);
+  }
+
+  /**
+   * GlobalTracer is used to get tracer. Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME)
    * is used
    */
   public TracingHttpClientConfigCallback() {
-    this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME);
+    this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME, null);
+  }
+
+  /**
+   * GlobalTracer is used to get tracer. Default span name provider (ClientSpanNameProvider.REQUEST_METHOD_NAME)
+   * is used
+   */
+  public TracingHttpClientConfigCallback(HttpClientConfigCallback callback) {
+    this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME, callback);
   }
 
   @Override
   public HttpAsyncClientBuilder customizeHttpClient(
-      final HttpAsyncClientBuilder httpClientBuilder) {
+      final HttpAsyncClientBuilder httpAsyncClientBuilder) {
+
+    HttpAsyncClientBuilder httpClientBuilder;
+    if (callback != null) {
+      httpClientBuilder = callback.customizeHttpClient(httpAsyncClientBuilder);
+    } else {
+      httpClientBuilder = httpAsyncClientBuilder;
+    }
 
     httpClientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
       SpanBuilder spanBuilder = tracer.buildSpan(spanNameProvider.apply(request))
