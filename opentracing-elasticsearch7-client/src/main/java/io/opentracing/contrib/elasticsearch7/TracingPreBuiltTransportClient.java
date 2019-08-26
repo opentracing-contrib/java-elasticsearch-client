@@ -19,10 +19,10 @@ import io.opentracing.contrib.elasticsearch.common.SpanDecorator;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import java.util.Collection;
-import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.ActionType;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -79,8 +79,8 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
   }
 
   @Override
-  protected <Request extends ActionRequest, Response extends ActionResponse>
-  void doExecute(Action<Response> action, Request request, ActionListener<Response> listener) {
+  protected <Request extends ActionRequest, Response extends ActionResponse> void doExecute(
+      ActionType<Response> action, Request request, ActionListener<Response> listener) {
     Tracer.SpanBuilder spanBuilder = tracer.buildSpan(request.getClass().getSimpleName())
         .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
 
@@ -90,4 +90,5 @@ public class TracingPreBuiltTransportClient extends PreBuiltTransportClient {
     ActionListener<Response> actionFuture = new TracingResponseListener<>(listener, span);
     super.doExecute(action, request, actionFuture);
   }
+
 }
