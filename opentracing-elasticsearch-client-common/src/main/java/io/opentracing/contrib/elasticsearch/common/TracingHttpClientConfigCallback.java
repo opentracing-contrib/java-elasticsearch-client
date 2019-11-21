@@ -21,6 +21,7 @@ import io.opentracing.propagation.Format;
 import io.opentracing.propagation.Format.Builtin;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
+import java.lang.reflect.Field;
 import java.util.function.Function;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -35,6 +36,8 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
   private final Tracer tracer;
   private final Function<HttpRequest, String> spanNameProvider;
   private final HttpClientConfigCallback callback;
+  private static final String OT_IS_AUTH_CACHING_DISABLED = "ot-is-auth-caching-disabled";
+  private static final String OT_SPAN = "ot-span";
 
   public TracingHttpClientConfigCallback(Tracer tracer,
       Function<HttpRequest, String> spanNameProvider,
@@ -79,18 +82,36 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
     this(GlobalTracer.get(), ClientSpanNameProvider.REQUEST_METHOD_NAME, callback);
   }
 
+  private boolean isAuthCachingDisabled(HttpAsyncClientBuilder httpAsyncClientBuilder) {
+    try {
+      final Field authCachingDisabledField = httpAsyncClientBuilder.getClass()
+          .getDeclaredField("authCachingDisabled");
+      final boolean accessible = authCachingDisabledField.isAccessible();
+      authCachingDisabledField.setAccessible(true);
+      final boolean isAuthCachingDisabled = (boolean) authCachingDisabledField
+          .get(httpAsyncClientBuilder);
+      authCachingDisabledField.setAccessible(accessible);
+      return isAuthCachingDisabled;
+    } catch (Exception ignore) {
+    }
+    return false;
+  }
+
   @Override
   public HttpAsyncClientBuilder customizeHttpClient(
       final HttpAsyncClientBuilder httpAsyncClientBuilder) {
 
     HttpAsyncClientBuilder httpClientBuilder;
+    final boolean isAuthCachingDisabled;
     if (callback != null) {
       httpClientBuilder = callback.customizeHttpClient(httpAsyncClientBuilder);
+      isAuthCachingDisabled = isAuthCachingDisabled(httpClientBuilder);
     } else {
       httpClientBuilder = httpAsyncClientBuilder;
+      isAuthCachingDisabled = false;
     }
 
-    httpClientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+    httpClientBuilder.addInterceptorLast((HttpRequestInterceptor) (request, context) -> {
       SpanBuilder spanBuilder = tracer.buildSpan(spanNameProvider.apply(request))
           .ignoreActiveSpan()
           .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT);
@@ -107,12 +128,24 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
       tracer.inject(span.context(), Builtin.HTTP_HEADERS,
           new HttpTextMapInjectAdapter(request));
 
-      context.setAttribute("span", span);
+      context.setAttribute(OT_SPAN, span);
+      if (isAuthCachingDisabled) {
+        context.setAttribute(OT_IS_AUTH_CACHING_DISABLED, "true");
+      }
     });
 
     httpClientBuilder.addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
-      Object spanObject = context.getAttribute("span");
+      if (context.getAttribute(OT_IS_AUTH_CACHING_DISABLED) != null) {
+        context.removeAttribute(OT_IS_AUTH_CACHING_DISABLED);
+        if (response.getStatusLine().getStatusCode() == 401) {
+          // response interceptor is called twice if auth caching is disabled
+          // and server requires authentication
+          return;
+        }
+      }
+      Object spanObject = context.getAttribute(OT_SPAN);
       if (spanObject instanceof Span) {
+        context.removeAttribute(OT_SPAN);
         Span span = (Span) spanObject;
         SpanDecorator.onResponse(response, span);
         span.finish();
