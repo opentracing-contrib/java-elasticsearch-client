@@ -137,7 +137,11 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
     httpClientBuilder.addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
       if (context.getAttribute(OT_IS_AUTH_CACHING_DISABLED) != null) {
         context.removeAttribute(OT_IS_AUTH_CACHING_DISABLED);
-        return;
+        if (response.getStatusLine().getStatusCode() == 401) {
+          // response interceptor is called twice if auth caching is disabled
+          // and server requires authentication
+          return;
+        }
       }
       Object spanObject = context.getAttribute(OT_SPAN);
       if (spanObject instanceof Span) {

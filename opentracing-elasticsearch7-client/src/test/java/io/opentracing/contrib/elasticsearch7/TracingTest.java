@@ -43,6 +43,7 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -99,6 +100,105 @@ public class TracingTest {
     RestClient restClient = RestClient.builder(
         new HttpHost("localhost", HTTP_PORT, "http"))
         .setHttpClientConfigCallback(new TracingHttpClientConfigCallback(mockTracer))
+        .build();
+
+    HttpEntity entity = new NStringEntity(
+        "{\n" +
+            "    \"user\" : \"kimchy\",\n" +
+            "    \"post_date\" : \"2009-11-15T14:12:12\",\n" +
+            "    \"message\" : \"trying out Elasticsearch\"\n" +
+            "}", ContentType.APPLICATION_JSON);
+
+    Request request = new Request("PUT", "/twitter/tweet/1");
+    request.setEntity(entity);
+
+    Response indexResponse = restClient.performRequest(request);
+
+    assertNotNull(indexResponse);
+
+    Request request2 = new Request("PUT", "/twitter/tweet/2");
+    request2.setEntity(entity);
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    restClient
+        .performRequestAsync(request2, new ResponseListener() {
+          @Override
+          public void onSuccess(Response response) {
+            latch.countDown();
+          }
+
+          @Override
+          public void onFailure(Exception exception) {
+            latch.countDown();
+          }
+        });
+
+    latch.await(30, TimeUnit.SECONDS);
+    restClient.close();
+
+    List<MockSpan> finishedSpans = mockTracer.finishedSpans();
+    assertEquals(2, finishedSpans.size());
+    checkSpans(finishedSpans, "PUT");
+    assertNull(mockTracer.activeSpan());
+  }
+
+  @Test
+  public void restClientWithCallback() throws Exception {
+    RestClient restClient = RestClient.builder(
+        new HttpHost("localhost", HTTP_PORT, "http"))
+        .setHttpClientConfigCallback(new TracingHttpClientConfigCallback(mockTracer,
+            (HttpClientConfigCallback) httpClientBuilder -> httpClientBuilder))
+        .build();
+
+    HttpEntity entity = new NStringEntity(
+        "{\n" +
+            "    \"user\" : \"kimchy\",\n" +
+            "    \"post_date\" : \"2009-11-15T14:12:12\",\n" +
+            "    \"message\" : \"trying out Elasticsearch\"\n" +
+            "}", ContentType.APPLICATION_JSON);
+
+    Request request = new Request("PUT", "/twitter/tweet/1");
+    request.setEntity(entity);
+
+    Response indexResponse = restClient.performRequest(request);
+
+    assertNotNull(indexResponse);
+
+    Request request2 = new Request("PUT", "/twitter/tweet/2");
+    request2.setEntity(entity);
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    restClient
+        .performRequestAsync(request2, new ResponseListener() {
+          @Override
+          public void onSuccess(Response response) {
+            latch.countDown();
+          }
+
+          @Override
+          public void onFailure(Exception exception) {
+            latch.countDown();
+          }
+        });
+
+    latch.await(30, TimeUnit.SECONDS);
+    restClient.close();
+
+    List<MockSpan> finishedSpans = mockTracer.finishedSpans();
+    assertEquals(2, finishedSpans.size());
+    checkSpans(finishedSpans, "PUT");
+    assertNull(mockTracer.activeSpan());
+  }
+
+  @Test
+  public void restClientWithCallbackDisabledAuthCaching() throws Exception {
+    RestClient restClient = RestClient.builder(
+        new HttpHost("localhost", HTTP_PORT, "http"))
+        .setHttpClientConfigCallback(new TracingHttpClientConfigCallback(mockTracer,
+            (HttpClientConfigCallback) httpClientBuilder -> {
+              httpClientBuilder.disableAuthCaching();
+              return httpClientBuilder;
+            }))
         .build();
 
     HttpEntity entity = new NStringEntity(
