@@ -165,7 +165,7 @@ public class TracingHttpClientConfigCallback implements RestClientBuilder.HttpCl
     SpanContext spanContext = tracer.extract(Format.Builtin.HTTP_HEADERS,
         new HttpTextMapExtractAdapter(request));
 
-    if (spanContext != null) {
+    if (spanContext != null && spanContext.toSpanId() != null) {
       return spanContext;
     }
 
