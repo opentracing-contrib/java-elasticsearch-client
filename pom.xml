@@ -68,7 +68,7 @@
     <elasticsearch5.version>5.6.16</elasticsearch5.version>
     <elasticsearch6.version>6.8.6</elasticsearch6.version>
     <elasticsearch7.version>7.6.0</elasticsearch7.version>
-    <log4j.version>2.13.2</log4j.version>
+    <log4j.version>2.16.0</log4j.version>
   </properties>
 
   <modules>
